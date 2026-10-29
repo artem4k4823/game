@@ -1,0 +1,154 @@
+:root {
+  --red: #d81e28;
+  --blue: #1f4fd6;
+  --gold: #f6c337;
+  --ink: #eaf1ff;
+  --dim: rgba(234, 241, 255, .6);
+  --panel: rgba(6, 12, 28, .55);
+  --line: rgba(160, 190, 255, .25);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: var(--ink);
+  font-family: 'Exo 2', system-ui, sans-serif; user-select: none; }
+#game { position: fixed; inset: 0; }
+#game canvas { display: block; width: 100%; height: 100%; }
+.hidden { display: none !important; }
+
+/* screen fx */
+#fx-vignette, #fx-xray, #fx-slowmo, #fx-dmg, #fx-water, #fx-fade { position: fixed; inset: 0; pointer-events: none; }
+#fx-vignette { background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.45) 100%); }
+#fx-xray { opacity: 0; transition: opacity .25s; mix-blend-mode: screen;
+  background: radial-gradient(ellipse at center, rgba(40,120,255,.05) 30%, rgba(40,140,255,.35) 100%),
+    repeating-linear-gradient(0deg, rgba(120,200,255,.05) 0 2px, transparent 2px 4px); }
+#fx-slowmo { opacity: 0; transition: opacity .3s;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(255,210,90,.28) 100%); }
+#fx-dmg { opacity: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(255,0,0,.55) 100%); }
+#fx-water { opacity: 0; background: linear-gradient(rgba(10,60,110,.35), rgba(0,20,50,.6)); transition: opacity .2s; }
+#fx-fade { opacity: 0; background: #fff; display: flex; align-items: center; justify-content: center; }
+#fade-text { font-family: 'Russo One'; font-size: 34px; letter-spacing: 3px; color: #10204a; text-align: center;
+  text-shadow: 0 0 20px rgba(255,255,255,.8); }
+#fade-text small { display: block; font-family: 'Exo 2'; font-size: 16px; letter-spacing: 1px; margin-top: 8px; opacity: .75; }
+
+/* hud */
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#world-panel { position: absolute; top: 18px; left: 20px; max-width: 420px; }
+#world-name { font-family: 'Russo One'; font-size: 26px; letter-spacing: 2px; text-shadow: 0 2px 8px #000; }
+#world-sub { font-size: 13px; color: var(--dim); margin-top: 2px; text-shadow: 0 1px 4px #000; }
+#objective { margin-top: 10px; padding: 10px 14px; background: var(--panel); border-left: 3px solid var(--gold);
+  border-radius: 4px; font-size: 14px; line-height: 1.4; backdrop-filter: blur(4px); }
+#objective:empty { display: none; }
+#objective b { color: var(--gold); }
+
+#crystals { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; }
+#crystals .cr { width: 22px; height: 30px; clip-path: polygon(50% 0, 100% 35%, 80% 100%, 20% 100%, 0 35%);
+  background: rgba(255,255,255,.12); border: 0; position: relative; }
+#crystals .cr.on { background: linear-gradient(160deg, #e9fbff, #5fe0ff 40%, #2a8cff); box-shadow: 0 0 12px #6ff; }
+#crystals .cr span { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--dim); white-space: nowrap; }
+
+#boss { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: min(560px, 60vw); text-align: center; }
+#boss-name { font-family: 'Russo One'; font-size: 15px; letter-spacing: 3px; color: #ffb3b3; text-shadow: 0 0 8px #f00; margin-bottom: 4px; }
+#boss .bar { height: 10px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,90,90,.6); border-radius: 2px; overflow: hidden; }
+#boss .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff2a2a, #ff8a3a); transition: width .15s; }
+
+#crosshair { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; transform: translate(-50%,-50%); }
+#crosshair i { position: absolute; inset: 0; border: 2px solid rgba(255,255,255,.7); border-radius: 50%; transform: scale(.45); }
+#crosshair b { position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px; background: #fff; border-radius: 50%; }
+#crosshair.lock i { border-color: #ff5656; transform: scale(.75); transition: transform .1s; }
+#charge { position: absolute; left: 50%; top: calc(50% + 26px); width: 80px; height: 4px; transform: translateX(-50%);
+  background: rgba(0,0,0,.4); border-radius: 2px; opacity: 0; }
+#charge i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), #fff); }
+
+#markers { position: absolute; inset: 0; }
+.mk { position: absolute; transform: translate(-50%, -50%); font-size: 12px; white-space: nowrap; text-align: center; text-shadow: 0 1px 3px #000; }
+.mk.enemy { width: 24px; height: 24px; border: 2px solid #ff4646; border-radius: 3px; transform: translate(-50%,-50%) rotate(45deg); opacity: .85; }
+.mk.enemy.boss { width: 40px; height: 40px; border-color: #ff9a2a; }
+.mk.enemy.frozen { border-color: #8fe6ff; }
+.mk.enemy.off { width: 0; height: 0; border: 8px solid transparent; border-left-color: #ff4646; border-radius: 0; }
+.mk.obj { color: var(--gold); font-weight: 800; }
+.mk.obj::before { content: '◆'; display: block; font-size: 20px; color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+.mk.planet { color: #cfe0ff; font-size: 13px; font-weight: 600; }
+.mk.planet::before { content: ''; display: block; margin: 0 auto 4px; width: 14px; height: 14px; border: 2px solid #9fc0ff; border-radius: 50%; }
+.mk.planet.sel { color: var(--gold); }
+.mk.planet.sel::before { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); width: 22px; height: 22px; }
+.mk.planet small { display: block; font-size: 11px; color: var(--dim); font-weight: 400; }
+.mk.edge { opacity: .8; }
+
+#toasts { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.toast { padding: 10px 22px; background: rgba(8,16,40,.75); border: 1px solid var(--line); border-radius: 4px;
+  font-size: 16px; text-align: center; animation: tin .35s ease-out; backdrop-filter: blur(4px); max-width: 640px; }
+.toast.big { font-family: 'Russo One'; font-size: 24px; letter-spacing: 2px; border-color: var(--gold); color: #fff3c4; }
+.toast.out { opacity: 0; transition: opacity .6s; }
+@keyframes tin { from { opacity: 0; transform: translateY(-10px) scale(.96); } }
+
+#vitals { position: absolute; left: 20px; bottom: 22px; width: 300px; }
+.vital { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.vital .ic { width: 20px; text-align: center; font-size: 16px; }
+.vital .ic.hp { color: #ff5a5a; } .vital .ic.en { color: var(--gold); }
+.vital .bar { flex: 1; height: 10px; background: rgba(0,0,0,.5); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.vital .bar i { display: block; height: 100%; width: 100%; transition: width .1s; }
+.vital .bar.hp i { background: linear-gradient(90deg, #c4161c, #ff5a5a); }
+.vital .bar.en i { background: linear-gradient(90deg, #ff9a1a, var(--gold), #fff2a8); }
+.vital .bar.en.over i { background: linear-gradient(90deg, #ffffff, #fff6b0, #ffd84a); box-shadow: 0 0 12px #ffd84a; }
+.vital em { font-style: normal; font-size: 12px; width: 30px; color: var(--dim); }
+#solar { font-size: 11px; color: var(--dim); margin: 4px 0 0 28px; }
+
+#abilities { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+.ab { width: 86px; padding: 6px 4px 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; text-align: center;
+  font-size: 11px; color: var(--dim); position: relative; overflow: hidden; }
+.ab kbd { display: block; font-family: 'Russo One'; font-size: 12px; color: var(--ink); margin-bottom: 2px; }
+.ab.on { border-color: var(--gold); color: #fff; box-shadow: 0 0 12px rgba(246,195,55,.5) inset; }
+.ab.cd::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: var(--cd, 0%); background: var(--red); }
+.ab.na { opacity: .35; }
+
+#flight { position: absolute; right: 24px; bottom: 20px; text-align: right; }
+#speed { font-family: 'Russo One'; font-size: 40px; line-height: 1; text-shadow: 0 2px 10px #000; }
+#flight .lbl { font-size: 12px; color: var(--dim); letter-spacing: 2px; }
+#mach { font-family: 'Russo One'; color: var(--gold); font-size: 16px; margin-top: 4px; min-height: 20px; }
+#alt { font-size: 13px; color: var(--dim); margin-top: 2px; }
+
+#hint { position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #fff;
+  text-shadow: 0 1px 4px #000; text-align: center; }
+
+kbd { font-family: 'Russo One'; font-size: 12px; padding: 1px 6px; border: 1px solid rgba(255,255,255,.3); border-radius: 3px; background: rgba(255,255,255,.06); }
+
+/* menu */
+#menu { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; overflow-y: auto; }
+.menu-bg { position: fixed; inset: 0; background:
+  radial-gradient(ellipse at 70% 20%, rgba(255,190,90,.25), transparent 50%),
+  radial-gradient(ellipse at 20% 80%, rgba(40,90,255,.35), transparent 55%),
+  linear-gradient(180deg, rgba(3,6,20,.65), rgba(0,0,0,.85)); }
+.menu-inner { position: relative; max-width: 760px; padding: 32px 24px; text-align: center; }
+.logo { display: flex; flex-direction: column; align-items: center; }
+.shield { width: 92px; height: 74px; background: var(--gold); clip-path: polygon(20% 0, 80% 0, 100% 28%, 50% 100%, 0 28%);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(255,200,60,.6); }
+.shield span { font-family: 'Russo One'; font-size: 52px; color: var(--red); transform: translateY(-6px) skewX(-8deg); }
+.logo h1 { font-family: 'Russo One'; font-size: clamp(40px, 8vw, 74px); margin: 14px 0 0; letter-spacing: 8px;
+  background: linear-gradient(180deg, #fff, #9fc0ff); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 4px 18px rgba(40,90,255,.6)); }
+.logo h2 { font-family: 'Exo 2'; font-weight: 600; font-size: 18px; letter-spacing: 10px; color: var(--gold); margin: 4px 0 0; text-transform: uppercase; }
+.lead { color: var(--dim); font-size: 16px; line-height: 1.5; max-width: 560px; margin: 18px auto; }
+button { font-family: 'Russo One'; font-size: 20px; letter-spacing: 3px; color: #fff; cursor: pointer;
+  padding: 14px 46px; border: 0; border-radius: 4px; background: linear-gradient(180deg, #e8323a, #a8121a);
+  box-shadow: 0 6px 24px rgba(216,30,40,.5), inset 0 1px 0 rgba(255,255,255,.3); transition: transform .1s; }
+button:hover:not(:disabled) { transform: translateY(-2px); }
+button:disabled { opacity: .6; cursor: wait; }
+button.ghost { background: transparent; border: 1px solid var(--line); box-shadow: none; font-size: 14px; padding: 12px 20px; }
+.quality { margin: 18px 0 8px; color: var(--dim); font-size: 14px; }
+.quality label { margin-left: 10px; cursor: pointer; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 22px; text-align: left;
+  margin-top: 18px; font-size: 13px; color: var(--dim); background: rgba(0,0,0,.35); padding: 16px 18px; border-radius: 6px; border: 1px solid var(--line); }
+
+#pause { position: fixed; inset: 0; z-index: 9; background: rgba(0,4,16,.78); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.pause-inner { text-align: center; width: min(1000px, 94vw); }
+.pause-inner h2 { font-family: 'Russo One'; letter-spacing: 4px; font-size: 30px; margin: 0 0 12px; }
+#solar-map { position: relative; height: 300px; margin: 8px 0; border: 1px solid var(--line); border-radius: 8px;
+  background: radial-gradient(ellipse at 6% 50%, rgba(255,190,80,.35), transparent 30%), rgba(0,0,0,.35); overflow: hidden; }
+.sm-p { position: absolute; top: 50%; transform: translate(-50%, -50%); cursor: pointer; text-align: center; pointer-events: auto; }
+.sm-p .dot { border-radius: 50%; margin: 0 auto; box-shadow: inset -6px -4px 10px rgba(0,0,0,.6); }
+.sm-p .nm { font-size: 12px; margin-top: 6px; color: var(--ink); }
+.sm-p .st { font-size: 11px; color: var(--dim); max-width: 120px; }
+.sm-p.done .nm::after { content: ' ◆'; color: #6ff; }
+.sm-p.sel .nm { color: var(--gold); }
+.sm-p.here .nm::before { content: '▼ '; color: var(--red); }
+.small { font-size: 13px; color: var(--dim); }
+.row { display: flex; gap: 12px; justify-content: center; margin-top: 10px; }

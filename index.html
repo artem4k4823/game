@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Супермен — Стальной горизонт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="game"></div>
+
+<div id="fx-vignette"></div>
+<div id="fx-xray"></div>
+<div id="fx-slowmo"></div>
+<div id="fx-dmg"></div>
+<div id="fx-water"></div>
+<div id="fx-fade"><div id="fade-text"></div></div>
+
+<div id="hud" class="hidden">
+  <div id="world-panel">
+    <div id="world-name">Земля</div>
+    <div id="world-sub"></div>
+    <div id="objective"></div>
+  </div>
+
+  <div id="crystals"></div>
+
+  <div id="boss" class="hidden">
+    <div id="boss-name">БОСС</div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <div id="crosshair"><i></i><b></b></div>
+  <div id="charge"><i></i></div>
+  <div id="markers"></div>
+  <div id="toasts"></div>
+
+  <div id="vitals">
+    <div class="vital"><span class="ic hp">✚</span><div class="bar hp"><i></i></div><em id="hp-num">100</em></div>
+    <div class="vital"><span class="ic en">☀</span><div class="bar en"><i></i></div><em id="en-num">100</em></div>
+    <div id="solar">Солнечная подзарядка ×1.0</div>
+  </div>
+
+  <div id="abilities">
+    <div class="ab" data-ab="punch"><kbd>ЛКМ</kbd><span>Удар</span></div>
+    <div class="ab" data-ab="heat"><kbd>ПКМ</kbd><span>Тепл. зрение</span></div>
+    <div class="ab" data-ab="freeze"><kbd>F</kbd><span>Ледяное дыхание</span></div>
+    <div class="ab" data-ab="slam"><kbd>Q</kbd><span>Удар о землю</span></div>
+    <div class="ab" data-ab="grab"><kbd>E</kbd><span>Схватить</span></div>
+    <div class="ab" data-ab="xray"><kbd>X</kbd><span>Рентген</span></div>
+    <div class="ab" data-ab="slow"><kbd>Z</kbd><span>Сверхскорость</span></div>
+  </div>
+
+  <div id="flight">
+    <div id="speed">0</div>
+    <div class="lbl">км/ч</div>
+    <div id="mach"></div>
+    <div id="alt"></div>
+  </div>
+
+  <div id="hint"></div>
+</div>
+
+<div id="menu">
+  <div class="menu-bg"></div>
+  <div class="menu-inner">
+    <div class="logo">
+      <div class="shield"><span>S</span></div>
+      <h1>СУПЕРМЕН</h1>
+      <h2>Стальной горизонт</h2>
+    </div>
+    <p class="lead">Процедурная Земля с городами, реками и горами. Полная разрушаемость.
+      Вылети из атмосферы и долети до любой планеты Солнечной системы. Собери 9 кристаллов Криптона.</p>
+    <button id="play" disabled>Загрузка…</button>
+    <div class="quality">
+      Графика:
+      <label><input type="radio" name="q" value="low"> Низкая</label>
+      <label><input type="radio" name="q" value="mid" checked> Средняя</label>
+      <label><input type="radio" name="q" value="high"> Высокая</label>
+    </div>
+    <div class="controls">
+      <div><kbd>W A S D</kbd> полёт / бег</div>
+      <div><kbd>Пробел</kbd> вверх / взлёт</div>
+      <div><kbd>Ctrl</kbd> / <kbd>C</kbd> вниз</div>
+      <div><kbd>Shift</kbd> ускорение (держи — гиперзвук)</div>
+      <div><kbd>ЛКМ</kbd> удар (держи — заряд)</div>
+      <div><kbd>ПКМ</kbd> тепловое зрение</div>
+      <div><kbd>F</kbd> ледяное дыхание</div>
+      <div><kbd>Q</kbd> удар о землю / пике</div>
+      <div><kbd>E</kbd> схватить / бросить / вырвать скалу</div>
+      <div><kbd>X</kbd> рентгеновское зрение</div>
+      <div><kbd>Z</kbd> сверхскорость (замедление времени)</div>
+      <div><kbd>Tab</kbd> цель в космосе · <kbd>T</kbd> автопилот</div>
+      <div><kbd>M</kbd> карта Солнечной системы · <kbd>Esc</kbd> пауза</div>
+    </div>
+  </div>
+</div>
+
+<div id="pause" class="hidden">
+  <div class="pause-inner">
+    <h2 id="pause-title">Пауза</h2>
+    <div id="solar-map"></div>
+    <p class="small" id="map-hint">Клик по планете — выбрать цель для автопилота (в космосе). Чтобы попасть в космос — взлети выше атмосферы.</p>
+    <div class="row">
+      <button id="resume">Продолжить</button>
+      <button id="reset-progress" class="ghost">Сбросить прогресс</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
